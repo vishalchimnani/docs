@@ -92,6 +92,9 @@ content: |
    consists of a write operation *W*\ :sub:`1` followed later in the
    sequence by a write operation *W*\ :sub:`2`. MongoDB guarantees that
    *W*\ :sub:`1` operation precedes *W*\ :sub:`2`.
+
+   .. seealso:: :ref:`causal-consistency`
+
 ---
 ref: isolate-cursor-snapshot
 content: |

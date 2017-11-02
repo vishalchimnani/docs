@@ -58,6 +58,7 @@ Monotonic Writes
 
 .. include:: /includes/extracts/monotonic-writes.rst
 
+
 .. _consistency-linearizable-reads:
 
 Real Time Order
@@ -71,3 +72,72 @@ with :writeconcern:`"majority"` write concern enables multiple threads
 to perform reads and writes on a single document as if a single thread
 performed these operations in real time; that is, the corresponding
 schedule for these reads and writes is considered linearizable.
+
+.. _causal-consistency:
+
+Causal Consistency
+------------------
+
+.. versionadded:: 3.6
+
+If an operation can influence the result of a subsequent operation,
+there is a causal relationship between the two operations. For example,
+a write operation that deletes all documents with a ``null`` status
+influences a subsequent read operation that counts all documents with a
+``null`` status. These two operations have a causal relationship.
+
+With causal consistency, MongoDB executes causal operations in an order
+that reflect their causal relationships, and clients observe results
+that are consistent with the causal relationships.
+
+.. _sessions:
+
+Sessions
+~~~~~~~~
+
+To provide causal consistency, MongoDB 3.6 introduces sessions. A
+session is a sequence of read and write operations whose ordering in
+the session reflect their causal relationships such that MongoDB
+guarantees:
+
+.. note::
+
+   These guarantees hold for any member of the MongoDB deployment.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Guarantees
+     - Description
+
+   * - Read your writes
+
+     - With sessions, read operations reflect the results of write
+       operations that precede them.
+
+   * - Monotonic reads
+
+     - With sessions, results of successive read operations do not
+       contradict the ordering of preceding write operations. For
+       example, if in a session:
+
+       - write\ :sub:`1` precedes write\ :sub:`2`,
+
+       - read\ :sub:`1` precedes read\ :sub:`2`, and 
+
+       - read\ :sub:`1` returns results that reflect write\ :sub:`2`
+
+       then, read\ :sub:`2` cannot return results of write\ :sub:`1`.
+
+   * - Monotonic writes
+
+     - With sessions, MongoDB executes write operations in order that
+       is consistent with their ordering in the session. All members of
+       the deployment reflect this ordering.
+
+   * - Write follow reads
+
+     - With sessions, MongoDB executes read operations that precede
+       write operations in the sessions before the write operations.
+
